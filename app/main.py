@@ -5,7 +5,7 @@ class ExitException(Exception):
 
 def cmd_register(cmds: dict, cmd: str):
     def decorator(func):
-        cmds[cmd] = func.__name__
+        cmds[cmd] = func.__func__
         return func
     return decorator
 
@@ -14,7 +14,7 @@ class Terminal:
 
     @cmd_register(cmds, "exit")
     @staticmethod
-    def _exit():
+    def _exit(cmd, *args):
         raise ExitException("Exiting")
     
     @cmd_register(cmds, "echo")
@@ -51,7 +51,7 @@ def main():
         sys.stdout.write("$ ")
         cmd = input()
         try:
-            Terminal().execute(cmd)
+            Terminal.execute(cmd)
         except ExitException as e:
             return    
 
