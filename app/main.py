@@ -67,7 +67,7 @@ class Terminal:
             Terminal.cmds[cmd](*args,**kwargs)
         elif file_path := Terminal.find_command(cmd):
             try:
-                res = subprocess.run([file_path, *args], capture_output=True, text=True, check=True)
+                res = subprocess.run([cmd, *args], capture_output=True, text=True, check=True)
                 sys.stdout.write(res.stdout)
             except subprocess.CalledProcessError as e:
                 print(e)
