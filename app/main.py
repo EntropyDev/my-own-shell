@@ -8,6 +8,8 @@ def main():
     while True:
         sys.stdout.write("$ ")
         cmd = input()
+        if cmd == "exit":
+            return 
         if not validate(cmd):
             sys.stdout.write(f"{cmd}: command not found\n")    
 
