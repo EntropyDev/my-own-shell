@@ -1,6 +1,18 @@
 import sys
 
-def validate(cmd):
+def echo(*args):
+    s = " ".join([word for word in args])+"\n"
+    sys.stdout.write(s)
+
+def validate(st):
+    st_a = st.split(" ")
+    [cmd, *args] = st_a
+    cmds = {
+        "echo": echo
+    }
+    if cmd in cmds:
+        cmds[cmd](*args)
+        return True
     return False
 
 def main():
