@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 
 class ExitException(Exception):
     pass
@@ -10,9 +11,24 @@ def cmd_register(cmds: dict, cmd: str):
         return func
     return decorator
 
+
 class Terminal:
 
     cmds = {}
+
+    @staticmethod
+    def find_command(cmd):
+        dirs = os.environ["PATH"].split(os.pathsep)
+        for dir in dirs:
+            try:
+                for file in os.listdir(dir):
+                    if file == cmd:
+                        file_path = os.path.join(dir, file)
+                        if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
+                            return file_path
+            except FileNotFoundError as e:
+                pass
+        return None
 
     @staticmethod
     def cmd_not_found(cmd):
@@ -37,19 +53,10 @@ class Terminal:
             sys.stdout.write(f"{type_cmd} is a shell builtin\n")
         else:
             # print(os.environ["PATH"])
-            dirs = os.environ["PATH"].split(os.pathsep)
-            for dir in dirs:
-                try:
-                    for file in os.listdir(dir):
-                        if file == type_cmd:
-                            file_path = os.path.join(dir, file)
-                            if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
-                                sys.stdout.write(f"{type_cmd} is {file_path}\n")
-                                return
-                except FileNotFoundError as e:
-                    pass
-        
-            sys.stdout.write(f"{type_cmd}: not found\n")
+            if file_path := Terminal.find_command(type_cmd):
+                sys.stdout.write(f"{type_cmd} is {file_path}\n")
+            else:
+                sys.stdout.write(f"{type_cmd}: not found\n")
 
     @staticmethod
     def execute(st):
@@ -58,6 +65,12 @@ class Terminal:
         kwargs = {}
         if cmd in Terminal.cmds:
             Terminal.cmds[cmd](*args,**kwargs)
+        elif file_path := Terminal.find_command(cmd):
+            try:
+                res = subprocess.run([file_path, *args], capture_output=True, text=True, check=True)
+                sys.stdout.write(res.stdout)
+            except subprocess.CalledProcessError as e:
+                print(e)
         else:
             Terminal.cmd_not_found(cmd)
 
