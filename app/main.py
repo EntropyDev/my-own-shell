@@ -3,7 +3,7 @@ import sys
 class ExitException(Exception):
     pass
 
-def cmd_register(cmds: dict, cmd: str, func_name: str):
+def cmd_register(cmds: dict, cmd: str):
     def decorator(func):
         cmds[cmd] = func.__name__
         return func
