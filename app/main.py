@@ -36,27 +36,26 @@ class Terminal:
         if type_cmd in Terminal.cmds:
             sys.stdout.write(f"{type_cmd} is a shell builtin\n")
         else:
-            dirs = kwargs["PATH"].split(":")
+            # print(os.environ["PATH"])
+            dirs = os.environ["PATH"].split(os.pathsep)
             for dir in dirs:
                 try:
                     for file in os.listdir(dir):
                         if file == type_cmd:
-                            file_path = dir+file
+                            file_path = os.path.join(dir, file)
                             if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
                                 sys.stdout.write(f"{type_cmd} is {file_path}\n")
                                 return
-                except FileNotFoundError:
+                except FileNotFoundError as e:
                     pass
         
             sys.stdout.write(f"{type_cmd}: not found\n")
 
     @staticmethod
-    def execute(st, PATH):
+    def execute(st):
         st_a = st.split(" ")
         [cmd, *args] = st_a
-        kwargs = {
-            "PATH": PATH
-        }
+        kwargs = {}
         if cmd in Terminal.cmds:
             Terminal.cmds[cmd](*args,**kwargs)
         else:
@@ -65,11 +64,10 @@ class Terminal:
 def main():
     # TODO: Uncomment the code below to pass the first stage
     while True:
-        PATH = os.environ["PATH"]
         sys.stdout.write("$ ")
         cmd = input()
         try:
-            Terminal.execute(cmd, PATH)
+            Terminal.execute(cmd)
         except ExitException as e:
             return    
 
